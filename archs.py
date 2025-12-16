@@ -258,20 +258,7 @@ class shiftmlp(nn.Module):
         x = self.fc1(x)
         x = self.dwconv(x, H, W)
         x = self.act(x)
-        x = self.drop(x)
-        
-        
-        xn = x.transpose(1, 2).view(B, -1, H, W).contiguous()
-        xn = F.pad(xn, (self.pad, self.pad, self.pad, self.pad), "constant", 0)
-        xs = torch.chunk(xn, self.shift_size, 1)
-        x_shift = [torch.roll(x_c, shifts=(shift, shift), dims=(2, 3)) for x_c, shift in zip(xs, range(-self.pad, self.pad+1))]
-        x_cat = torch.cat(x_shift, 1)
-        x_cat = torch.narrow(x_cat, 2, self.pad, H)
-        x_s = torch.narrow(x_cat, 3, self.pad, W)
-        x_s = x_s.reshape(B, -1, H*W).transpose(1, 2)
-        
-        x = self.fc2(x_s)
-        x = self.drop(x)
+        x = self.fc2(x)
         
         return x
 
@@ -505,4 +492,5 @@ class FMLP(nn.Module):
 
 
         return self.final(out)
+
 
